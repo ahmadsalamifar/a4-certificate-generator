@@ -14,9 +14,9 @@ English | فارسی
 
 🇮🇷 Persian Output
 
+<img src="./Certificate-en.jpg" alt="English Certificate" width="300" />
 
-
-
+<img src="./Certificate-fa.jpg" alt="Persian Certificate" width="300" />
 
 Standard Garamond & Cinzel Fonts
 
