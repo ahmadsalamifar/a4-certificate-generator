@@ -4,29 +4,22 @@
 
 یه ابزار ساده برای ساخت گواهی‌نامه (بدون نیاز به سرور)
 
-English | فارسی
-
-</div>
-
-<div align="center">
-
-🇬🇧 English Output
-
-🇮🇷 Persian Output
-
-<img src="./Certificate-en.jpg" alt="English Certificate" width="300" />
-
-<img src="./Certificate-fa.jpg" alt="Persian Certificate" width="300" />
-
-Standard Garamond & Cinzel Fonts
-
-Official Amiri & Nastaliq (Gulzar) Fonts
-
+پ
 </div>
 
 <a name="-english"></a>
 
 🇬🇧 English
+
+<div align="center">
+<img src="./Certificate-en.jpg" alt="English Certificate" width="600" />
+
+
+
+
+
+<em>Standard Garamond & Cinzel Fonts</em>
+</div>
 
 I created this project because I wanted a way to generate certificates quickly and without any limits. It's a simple, straightforward tool that lets you design and download perfect A4 PDFs directly from your browser, no strings attached.
 
@@ -60,6 +53,16 @@ This project is open-sourced under the MIT License.
 
 🇮🇷 Persian (فارسی)
 
+<div align="center">
+<img src="./Certificate-fa.jpg" alt="Persian Certificate" width="600" />
+
+
+
+
+
+<em>Official Amiri & Nastaliq (Gulzar) Fonts</em>
+</div>
+
 این پروژه رو برای این ساختم که هر وقت لازم شد، بتونم خیلی راحت و بدون هیچ محدودیتی گواهی‌نامه بسازم. یه ابزار ساده‌ست که مستقیم توی مرورگر کار می‌کنه و چون نیازی به سرور نداره، اطلاعاتت جایی ذخیره نمی‌شه و کاملاً امنه.
 
 🚀 ویژگی‌ها
@@ -70,7 +73,7 @@ This project is open-sourced under the MIT License.
 
 افقی و عمودی: با یه کلیک ساده می‌تونی جهت کاغذ رو عوض کنی. چیدمان المان‌ها خودش با حالت جدید جور می‌شه.
 
-فارسی و انگلیسی: سیستم کاملاً دو زبانه است. وقتی زبان رو عوض می‌کنی، هم چیدمان راست‌چین می‌شه و هم فونت‌ها به «امیری» و «نستعلیق» تغییر می‌کنن تا خروجی نهایی کاملاً رسمی و شیک باشه.
+فارسی و انگلیسی: سیستم کاملاً دو زبانه است. وقتی زبان رو عوض می‌کنی، هم چیدمان راست‌چین می‌شه و هم فونت‌ها به «امیری» و «نستعلیق» تغییر می‌کنند تا خروجی نهایی کاملاً رسمی و شیک باشه.
 
 خروجی باکیفیت: فایل‌های PDF و عکسی که می‌گیری با رزولوشن بالا ساخته می‌شن که موقع چاپ تار نباشن.
 
