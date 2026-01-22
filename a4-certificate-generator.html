@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional A4 Certificate Generator</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Fonts: Cinzel/Garamond for English, Amiri/Gulzar(Nastaliq) for Persian -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=EB+Garamond:wght@400;700&family=Dancing+Script:wght@700&family=Amiri:wght@400;700&family=Gulzar&family=Vazirmatn:wght@400&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --cert-bg: #fffaf0;
+            --cert-border: #c0a98e;
+            --text-main: #3a2d21;
+            --a4-width-landscape: 297mm;
+            --a4-height-landscape: 210mm;
+            --a4-width-portrait: 210mm;
+            --a4-height-portrait: 297mm;
+        }
+
+        body {
+            font-family: 'Vazirmatn', 'EB Garamond', serif;
+            background-color: #e5e7eb;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Certificate default font (English) */
+        .cert-canvas {
+            font-family: 'EB Garamond', serif;
+        }
+
+        /* Persian Styles Override - Fixing Letter Spacing for Persian */
+        .lang-fa .cert-canvas {
+            font-family: 'Amiri', serif;
+        }
+        
+        /* IMPORTANT: Reset letter-spacing for all Persian text elements to prevent broken characters */
+        .lang-fa .cert-canvas * {
+            letter-spacing: 0 !important;
+            tracking: 0 !important;
+            word-spacing: normal !important;
+        }
+        
+        .lang-fa button, .lang-fa .controls-bar {
+            font-family: 'Vazirmatn', sans-serif;
+        }
+
+        #certificate-wrapper {
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            margin: 20px;
+            overflow: hidden;
+            display: block;
+        }
+
+        .cert-canvas {
+            width: var(--a4-width-landscape);
+            height: var(--a4-height-landscape);
+            background-color: var(--cert-bg);
+            border: 4mm double var(--cert-border);
+            position: relative;
+            padding: 12mm; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
+
+        .cert-canvas::before {
+            content: "";
+            position: absolute;
+            top: 6mm; left: 6mm; right: 6mm; bottom: 6mm;
+            border: 1px solid var(--cert-border);
+            pointer-events: none;
+        }
+
+        .univ-name { font-family: 'Cinzel', serif; font-size: 2.2rem; line-height: 1.1; text-align: center; }
+        .lang-fa .univ-name { font-family: 'Amiri', serif; font-weight: 700; font-size: 2.4rem; }
+
+        .student-name { font-family: 'Dancing Script', cursive; font-size: 3.5rem; color: #b45309; text-align: center; margin: 0; }
+        .lang-fa .student-name { font-family: 'Gulzar', serif; font-weight: 400; font-size: 3.5rem; line-height: 1.5; padding-bottom: 10px; }
+
+        .degree-title { font-size: 2rem; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em; }
+        .logo-img { width: 6rem; height: 6rem; object-fit: contain; opacity: 0.9; margin: 0.5rem 0; }
+        
+        .portrait-mode .cert-canvas { width: var(--a4-width-portrait); height: var(--a4-height-portrait); padding: 20mm; }
+        .portrait-mode .univ-name { font-size: 2.8rem; }
+        .portrait-mode .lang-fa .univ-name { font-size: 3rem; }
+        .portrait-mode .student-name { font-size: 5rem; margin: 10px 0; }
+        .portrait-mode .lang-fa .student-name { font-size: 4.5rem; }
+
+        [contenteditable="true"]:hover { background: rgba(192, 169, 142, 0.1); border-radius: 4px; cursor: text; }
+        .signatures { width: 100%; display: flex; justify-content: space-around; margin-top: 10px; }
+        .sig-box { width: 60mm; border-top: 0.5mm solid var(--text-main); text-align: center; padding-top: 2mm; }
+
+        .controls-bar {
+            position: sticky; top: 0; z-index: 100; width: 100%;
+            background: #1f2937; padding: 1rem; color: white;
+            display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;
+        }
+
+        @media (max-width: 320mm) { #certificate-wrapper { transform: scale(0.8); transform-origin: top center; } }
+        @media (max-width: 250mm) { #certificate-wrapper { transform: scale(0.5); transform-origin: top center; } }
+    </style>
+</head>
+<body>
+
+    <div class="controls-bar shadow-xl">
+        <button id="langBtn" class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded font-bold transition">فارسی</button>
+        <button id="orientBtn" class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded font-bold transition">Switch to Portrait</button>
+        <label class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded cursor-pointer transition border border-gray-500">
+            Change Logo
+            <input type="file" id="logoUpload" accept="image/*" class="hidden">
+        </label>
+        <div class="flex gap-2 ml-4 border-l border-gray-600 pl-4">
+            <button onclick="exportDoc('jpg')" class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded font-bold transition">Download JPG</button>
+            <button onclick="exportDoc('pdf')" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded font-bold transition">Download PDF</button>
+        </div>
+    </div>
+
+    <div id="certificate-wrapper">
+        <div id="certificate" class="cert-canvas">
+            <div class="flex flex-col items-center">
+                <h1 class="univ-name uppercase" contenteditable="true" data-key="univ">Global University of Excellence</h1>
+                <!-- Increased margin-top (mt-4) to prevent overlap in Persian -->
+                <p class="text-xl tracking-[0.2em] mt-4" contenteditable="true" data-key="campus">OFFICE OF THE REGISTRAR</p>
+            </div>
+            <div><img id="univLogo" src="https://img.icons8.com/ios-filled/150/3a2d21/university.png" alt="Logo" class="logo-img"></div>
+            <div class="text-center w-full px-10">
+                <p class="text-xl italic mb-2" contenteditable="true" data-key="certify">This diploma certifies that</p>
+                <h2 class="student-name" contenteditable="true" data-key="name">Alex J. Richardson</h2>
+                <p class="text-lg max-w-3xl mx-auto leading-relaxed mt-4" contenteditable="true" data-key="body">has successfully completed the prescribed curriculum and satisfied all academic requirements for the graduation from this institution.</p>
+                <div class="mt-4">
+                    <h3 class="degree-title" contenteditable="true" data-key="degree">Bachelor of Technology</h3>
+                    <p class="text-xl mt-1" contenteditable="true" data-key="major">in Computer Science and Engineering</p>
+                </div>
+            </div>
+            <div class="w-full">
+                <div class="signatures">
+                    <div class="sig-box">
+                        <p class="font-bold text-lg" contenteditable="true" data-key="sig1">Dr. Sarah Johnson</p>
+                        <p class="text-xs uppercase tracking-tighter opacity-70" data-key="title1">University President</p>
+                    </div>
+                    <div class="sig-box">
+                        <p class="font-bold text-lg" contenteditable="true" data-key="sig2">Prof. Michael Chen</p>
+                        <p class="text-xs uppercase tracking-tighter opacity-70" data-key="title2">Dean of Academic Affairs</p>
+                    </div>
+                </div>
+                <p class="text-center mt-6 text-base font-serif" contenteditable="true" data-key="date">Issued on the 15th of June, 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            en: {
+                univ: "Global University of Excellence", campus: "OFFICE OF THE REGISTRAR",
+                certify: "This diploma certifies that", name: "Alex J. Richardson",
+                body: "has successfully completed the prescribed curriculum and satisfied all academic requirements for the graduation from this institution.",
+                degree: "Bachelor of Technology", major: "in Computer Science and Engineering",
+                sig1: "Dr. Sarah Johnson", title1: "University President",
+                sig2: "Prof. Michael Chen", title2: "Dean of Academic Affairs",
+                date: "Issued on the 15th of June, 2025", btnLang: "فارسی",
+                btnOrient: (p) => p ? "Switch to Landscape" : "Switch to Portrait"
+            },
+            fa: {
+                univ: "دانشگاه بین‌المللی علم و فناوری", campus: "اداره کل امور فارغ‌التحصیلان",
+                certify: "بدین‌وسیله گواهی می‌شود که", name: "جناب آقای رامین علوی",
+                body: "دوره آموزشی مصوب را با موفقیت به پایان رسانده و تمامی الزامات آکادمیک جهت فارغ‌التحصیلی از این موسسه را احراز نموده است.",
+                degree: "کارشناسی تکنولوژی", major: "در رشته مهندسی کامپیوتر و فناوری اطلاعات",
+                sig1: "دکتر سارا احمدی", title1: "ریاست دانشگاه",
+                sig2: "پروفسور پیمان کریمی", title2: "معاونت امور آموزشی",
+                date: "صادر شده در تاریخ ۲۵ خرداد ۱۴۰۴", btnLang: "English",
+                btnOrient: (p) => p ? "تغییر به افقی" : "تغییر به عمودی"
+            }
+        };
+
+        let currentLang = 'en', isPortrait = false;
+
+        document.getElementById('langBtn').addEventListener('click', () => {
+            currentLang = currentLang === 'en' ? 'fa' : 'en';
+            document.documentElement.dir = currentLang === 'fa' ? 'rtl' : 'ltr';
+            document.body.classList.toggle('lang-fa', currentLang === 'fa');
+            document.querySelectorAll('[data-key]').forEach(el => {
+                const key = el.getAttribute('data-key');
+                if (translations[currentLang][key]) el.innerText = translations[currentLang][key];
+            });
+            updateButtons();
+        });
+
+        document.getElementById('orientBtn').addEventListener('click', () => {
+            isPortrait = !isPortrait;
+            document.body.classList.toggle('portrait-mode', isPortrait);
+            updateButtons();
+        });
+
+        function updateButtons() {
+            document.getElementById('langBtn').innerText = translations[currentLang].btnLang;
+            document.getElementById('orientBtn').innerText = translations[currentLang].btnOrient(isPortrait);
+        }
+
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => document.getElementById('univLogo').src = e.target.result;
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        async function exportDoc(type) {
+            const btn = event.target, originalText = btn.innerText;
+            btn.innerText = "Processing..."; btn.disabled = true;
+            try {
+                // Ensure all fonts are loaded before capturing
+                await document.fonts.ready;
+                
+                if (!window.jspdf) throw new Error("Library not loaded");
+                const { jsPDF } = window.jspdf;
+                
+                const canvas = await html2canvas(document.getElementById('certificate'), { 
+                    scale: 3, 
+                    useCORS: true, 
+                    backgroundColor: "#fffaf0",
+                    logging: false
+                });
+                
+                const fileName = `Certificate-${currentLang}`;
+                if (type === 'jpg') {
+                    const link = document.createElement('a'); 
+                    link.download = `${fileName}.jpg`;
+                    link.href = canvas.toDataURL('image/jpeg', 0.9); 
+                    link.click();
+                } else {
+                    const pdf = new jsPDF(isPortrait ? 'p' : 'l', 'mm', 'a4');
+                    pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
+                    pdf.save(`${fileName}.pdf`);
+                }
+            } catch (err) { 
+                console.error(err);
+                alert("Error generating file. Please refresh."); 
+            }
+            finally { btn.innerText = originalText; btn.disabled = false; }
+        }
+    </script>
+</body>
+</html>
